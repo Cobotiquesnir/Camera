@@ -2,9 +2,19 @@ import cv2
 import mediapipe as mp
 import pyrealsense2 as rs
 import numpy as np
+import mysql.connector
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
+
+# Configurer la connexion à la base de données MySQL
+cnx = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="xyz"
+)
+cursor = cnx.cursor()
 
 # Configurer la caméra Intel RealSense D415
 pipeline = rs.pipeline()
@@ -39,18 +49,26 @@ with mp_hands.Hands(
                 mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 
                 # Afficher les coordonnées x, y et z pour chaque point de repère
-                for idx, landmark in enumerate(hand_landmarks.landmark):
+                for id, landmark in enumerate(hand_landmarks.landmark):
                     x, y = int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])
                     
                     if 0 <= x < depth_frame.get_width() and 0 <= y < depth_frame.get_height():
                         z = depth_frame.get_distance(x, y)
-                        print(f"Landmark {idx}: x={x}, y={y}, z={z}")
+                        print(f"Landmark {id}: x={x}, y={y}, z={z}")
+                        
+                        # Insérer les coordonnées x, y et z dans la base de données
+                        #insert_query = "INSERT INTO co (id, x, y, z) VALUES (%s, %s, %s, %s)"
+                        insert_query = """INSERT INTO co (id, x, y, z) VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE x=VALUES(x), y=VALUES(y), z=VALUES(z)"""
+
+                        cursor.execute(insert_query, (id, x, y, z))
+                        cnx.commit()
         
         # Afficher les images
         cv2.imshow("Color Frame", image)
         cv2.imshow("Depth Frame", depth_colormap)
 
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+        if cv2.waitKey(5) & 0xFF == 27:
             break
 
 pipeline.stop()
