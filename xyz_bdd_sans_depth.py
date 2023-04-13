@@ -28,6 +28,10 @@ with mp_hands.Hands(
     min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
     
     while True:
+        #permet de réenitialiser le compte "id" (recommence les "id" à 0)
+        cursor.execute("ALTER TABLE co AUTO_INCREMENT = 1")
+        cnx.commit()
+
         # Obtenir les images de la caméra et aligner la profondeur sur la couleur
         frames = pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
@@ -46,7 +50,7 @@ with mp_hands.Hands(
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 
-                # Afficher les coordonnées x, y et z pour chaque point de repère
+                # Insérer les coordonnées x, y et z pour chaque point de repère
                 for id, landmark in enumerate(hand_landmarks.landmark):
                     x, y = int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])
                     
@@ -54,11 +58,10 @@ with mp_hands.Hands(
                         z = depth_frame.get_distance(x, y)
                         print(f"Landmark {id}: x={x}, y={y}, z={z}")
                         
-                        # Insérer les coordonnées x, y et z dans la base de données
-                        insert_query = """INSERT INTO co (id, x, y, z) VALUES (%s, %s, %s, %s)
-                        ON DUPLICATE KEY UPDATE x=VALUES(x), y=VALUES(y), z=VALUES(z)"""
+                        # Insérer les coordonnées x, y et z dans la base de données avec un ID unique
+                        insert_query = """INSERT INTO co (x, y, z) VALUES (%s, %s, %s)"""
 
-                        cursor.execute(insert_query, (id, x, y, z))
+                        cursor.execute(insert_query, (x, y, z))
                         cnx.commit()
         
         # Afficher l'image couleur
