@@ -1,0 +1,7 @@
+CREATE TABLE co (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    x FLOAT NOT NULL,
+    y FLOAT NOT NULL,
+    z FLOAT NOT NULL,
+    UNIQUE KEY idx_id (id)
+);
