@@ -5,3 +5,5 @@ CREATE TABLE co (
     z FLOAT NOT NULL,
     UNIQUE KEY idx_id (id)
 );
+
+ALTER TABLE co ADD COLUMN roll FLOAT, ADD COLUMN pitch FLOAT, ADD COLUMN yaw FLOAT; 
