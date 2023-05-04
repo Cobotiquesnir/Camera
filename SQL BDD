@@ -7,3 +7,16 @@ CREATE TABLE co (
 );
 
 ALTER TABLE co ADD COLUMN roll FLOAT, ADD COLUMN pitch FLOAT, ADD COLUMN yaw FLOAT; 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CREATE TABLE co (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    x FLOAT NOT NULL,
+    y FLOAT NOT NULL,
+    z FLOAT NOT NULL,
+    roll FLOAT,
+    pitch FLOAT,
+    yaw FLOAT,
+    UNIQUE KEY idx_id (id)
+);
